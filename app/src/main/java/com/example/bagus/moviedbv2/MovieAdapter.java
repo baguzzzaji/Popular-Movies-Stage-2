@@ -43,7 +43,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         String poster_path = "http://image.tmdb.org/t/p/w185" + movie.getMoviePoster();
         Picasso.with(context)
                 .load(poster_path)
-                .placeholder(R.drawable.poster)
                 .into(holder.posterImageView);
     }
 

@@ -7,7 +7,6 @@ import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -32,7 +31,7 @@ import retrofit2.Response;
 public class PopularMoviesFragment extends Fragment{
     private static final String TAG = PopularMoviesFragment.class.getSimpleName();
 
-    private RecyclerView moviesRecyclverView;
+    private RecyclerView moviesRecyclerView;
     List<Movie> movies;
 
     public PopularMoviesFragment() {
@@ -63,13 +62,13 @@ public class PopularMoviesFragment extends Fragment{
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
         View rootView = inflater.inflate(R.layout.fragment_popular_movies, container, false);
         initializeRecyclerView(rootView);
-
         if (savedInstanceState == null || !savedInstanceState.containsKey("movies")) {
+
             if (isNetworkAvailable()) {
                 getPopularMovies();
+                Log.d(TAG, "Downloading movies!");
             } else {
                 Toast.makeText(getActivity(), "Could not download movies, network error.", Toast.LENGTH_SHORT).show();
             }
@@ -79,13 +78,14 @@ public class PopularMoviesFragment extends Fragment{
 
         }
         MovieAdapter adapter = new MovieAdapter(movies, R.layout.movie_item, getContext());
+
+        moviesRecyclerView.setAdapter(adapter);
         adapter.setClickListener(new MovieAdapter.ClickListener() {
             @Override
             public void itemClicked(View view, int position) {
+                startActivity(new Intent(getActivity(), DetailActivity.class));
             }
         });
-
-        moviesRecyclverView.setAdapter(adapter);
 
         // Inflate the layout for this fragment
         return rootView;
@@ -94,15 +94,15 @@ public class PopularMoviesFragment extends Fragment{
     private void initializeRecyclerView(View view) {
         int spanSize = 0;
         movies = new ArrayList<>();
-        moviesRecyclverView = (RecyclerView) view.findViewById(R.id.rv_popular_movies);
-        moviesRecyclverView.setHasFixedSize(true);
+        moviesRecyclerView = (RecyclerView) view.findViewById(R.id.rv_popular_movies);
+        moviesRecyclerView.setHasFixedSize(true);
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             spanSize = 4;
         } else if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
             spanSize = 2;
         }
-        moviesRecyclverView.setLayoutManager(new GridLayoutManager(getContext(), spanSize));
-        moviesRecyclverView.setAdapter(new MovieAdapter(movies, R.layout.movie_item, getContext()));
+        moviesRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), spanSize));
+        moviesRecyclerView.setAdapter(new MovieAdapter(movies, R.layout.movie_item, getContext()));
     }
 
     private boolean isNetworkAvailable() {
@@ -114,10 +114,9 @@ public class PopularMoviesFragment extends Fragment{
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
         ArrayList<Movie> arrayList = (ArrayList<Movie>) movies;
         outState.putParcelableArrayList("movies", arrayList);
-
+        super.onSaveInstanceState(outState);
     }
 
 }

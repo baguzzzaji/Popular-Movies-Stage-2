@@ -30,7 +30,7 @@ import retrofit2.Response;
 public class TopRatedFragment extends Fragment {
     private static final String TAG = PopularMoviesFragment.class.getSimpleName();
 
-    private RecyclerView moviesRecyclverView;
+    private RecyclerView moviesRecyclerView;
     List<Movie> movies;
 
     public TopRatedFragment() {
@@ -75,7 +75,7 @@ public class TopRatedFragment extends Fragment {
             movies = savedInstanceState.getParcelableArrayList("movies");
         }
 
-        moviesRecyclverView.setAdapter(new MovieAdapter(movies, R.layout.movie_item, getContext()));
+        moviesRecyclerView.setAdapter(new MovieAdapter(movies, R.layout.movie_item, getContext()));
 
         // Inflate the layout for this fragment
         return rootView;
@@ -84,15 +84,15 @@ public class TopRatedFragment extends Fragment {
     private void initializeRecyclerView(View view) {
         int spanSize = 0;
         movies = new ArrayList<>();
-        moviesRecyclverView = (RecyclerView) view.findViewById(R.id.rv_top_rated_movies);
-        moviesRecyclverView.setHasFixedSize(true);
+        moviesRecyclerView = (RecyclerView) view.findViewById(R.id.rv_top_rated_movies);
+        moviesRecyclerView.setHasFixedSize(true);
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             spanSize = 4;
         } else if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
             spanSize = 2;
         }
-        moviesRecyclverView.setLayoutManager(new GridLayoutManager(getContext(), spanSize));
-        moviesRecyclverView.setAdapter(new MovieAdapter(movies, R.layout.movie_item, getContext()));
+        moviesRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), spanSize));
+        moviesRecyclerView.setAdapter(new MovieAdapter(movies, R.layout.movie_item, getContext()));
     }
 
     private boolean isNetworkAvailable() {

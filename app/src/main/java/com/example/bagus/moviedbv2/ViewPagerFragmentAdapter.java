@@ -1,10 +1,14 @@
 package com.example.bagus.moviedbv2;
 
+import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 
-public class ViewPagerFragmentAdapter extends FragmentPagerAdapter {
+import java.io.Serializable;
+
+public class ViewPagerFragmentAdapter extends FragmentStatePagerAdapter{
 
     protected String tabTitles[] = new String[] {"Popular", "Top Rated", "Favourites"};
 
@@ -19,9 +23,10 @@ public class ViewPagerFragmentAdapter extends FragmentPagerAdapter {
                 return new PopularMoviesFragment();
             case 1:
                 return new TopRatedFragment();
-            default:
+            case 2:
                 return new FavoritesFragment();
         }
+        return null;
     }
 
     @Override

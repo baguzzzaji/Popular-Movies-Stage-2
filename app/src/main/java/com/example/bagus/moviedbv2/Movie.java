@@ -3,6 +3,7 @@ package com.example.bagus.moviedbv2;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.renderscript.Double2;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -20,16 +21,7 @@ public class Movie implements Parcelable {
     @SerializedName("backdrop_path")
     String movieBackdropImage;
     @SerializedName("vote_average")
-    double movieRating;
-
-    public Movie(String movie, String overview, double rating, String release_date, String image, String backdrop) {
-        movieTitle = movie;
-        moviePoster = image;
-        movieOverview = overview;
-        movieRating = rating;
-        movieReleaseDate = release_date;
-        movieBackdropImage = backdrop;
-    }
+    Double movieRating;
 
     public String getMovieTitle() {
         return movieTitle;
@@ -39,7 +31,7 @@ public class Movie implements Parcelable {
         return movieOverview;
     }
 
-    public double getMovieRating() {
+    public Double getMovieRating() {
         return movieRating;
     }
 
