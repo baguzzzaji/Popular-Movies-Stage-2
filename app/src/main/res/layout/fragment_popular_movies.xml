@@ -1,14 +1,7 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:tools="http://schemas.android.com/tools"
-android:layout_width="match_parent"
-android:layout_height="match_parent"
-tools:context="com.example.bagus.moviedbv2.PopularMoviesFragment">
+<android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rv_popular_movies"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".PopularMoviesFragment" />
 
-    <android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/rv_popular_movies"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context=".PopularMoviesFragment"/>
-
-</FrameLayout>
