@@ -3,11 +3,8 @@ package com.example.bagus.moviedbv2;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.renderscript.Double2;
 
 import com.google.gson.annotations.SerializedName;
-
-import java.util.List;
 
 public class Movie implements Parcelable {
     @SerializedName("title")
@@ -22,6 +19,16 @@ public class Movie implements Parcelable {
     String movieBackdropImage;
     @SerializedName("vote_average")
     Double movieRating;
+    @SerializedName("id")
+    String movieId;
+
+    public String getMovieId() {
+        return movieId;
+    }
+
+    public void setMovieId(String movieId) {
+        this.movieId = movieId;
+    }
 
     public String getMovieTitle() {
         return movieTitle;
@@ -54,6 +61,7 @@ public class Movie implements Parcelable {
         moviePoster = in.readString();
         movieBackdropImage = in.readString();
         movieRating = in.readDouble();
+        movieId = in.readString();
     }
 
     @Override
@@ -69,6 +77,7 @@ public class Movie implements Parcelable {
         dest.writeString(moviePoster);
         dest.writeString(movieBackdropImage);
         dest.writeDouble(movieRating);
+        dest.writeString(movieId);
     }
 
     public static final Parcelable.Creator<Movie> CREATOR = new Parcelable.Creator<Movie>() {

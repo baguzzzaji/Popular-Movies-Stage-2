@@ -83,7 +83,9 @@ public class PopularMoviesFragment extends Fragment{
         adapter.setClickListener(new MovieAdapter.ClickListener() {
             @Override
             public void itemClicked(View view, int position) {
-                startActivity(new Intent(getActivity(), DetailActivity.class));
+                Intent intent = new Intent(getActivity(), DetailActivity.class);
+                intent.putExtra(MovieAdapter.MovieViewHolder.MOVIE, movies.get(position));
+                startActivity(intent);
             }
         });
 
