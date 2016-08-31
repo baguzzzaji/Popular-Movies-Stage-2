@@ -19,5 +19,8 @@ public interface TmdbInterface {
     Call<MovieResults> getMovieDetails(@Path("id") int id, @Query("api_key") String api);
 
     @GET("movie/{id}/videos")
-    Call<TrailerResults> getTrailer(@Path("id") String id, @Query("api_key") String api);
+    Call<TrailerResults> getTrailers(@Path("id") String id, @Query("api_key") String api);
+
+    @GET("movie/{id}/reviews")
+    Call<ReviewResults> getReviews(@Path("id") String id, @Query("api_key") String api);
 }

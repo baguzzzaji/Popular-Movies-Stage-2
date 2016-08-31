@@ -10,4 +10,7 @@
     <string name="detail_backdrop_description">Backdrop Image</string>
     <string name="trailer_text_1">Trailer 1</string>
     <string name="trailer_text_2">Trailer 2</string>
+    <string name="review_author_placeholder">Author name</string>
+    <string name="review_text_placeholder">The review text</string>
+    <string name="review_headline_text">Reviews</string>
 </resources>

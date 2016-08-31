@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.bagus.moviedbv2.api.RetrofitHelper;
+import com.example.bagus.moviedbv2.api.ReviewResults;
 import com.example.bagus.moviedbv2.api.TmdbInterface;
 import com.example.bagus.moviedbv2.api.TrailerResults;
 import com.squareup.picasso.Picasso;
@@ -39,7 +42,10 @@ public class DetailActivityFragment extends Fragment {
 
     private Movie movie;
     private List<Trailer> trailers;
+    private List<Review> reviews;
     private Context context;
+
+    private RecyclerView recyclerView;
 
     public DetailActivityFragment() {
     }
@@ -49,18 +55,41 @@ public class DetailActivityFragment extends Fragment {
         super.onCreate(savedInstanceState);
         movie = getActivity().getIntent().getParcelableExtra(MovieAdapter.MovieViewHolder.MOVIE);
         context = getContext();
-        getTrailer(movie.getMovieId());
-        Log.d(TAG, "The movie id is " + movie.getMovieId());
+        getTrailers(movie.getMovieId());
+        getReviews(movie.getMovieId());
     }
 
-    private void getTrailer(String movieId) {
+    private void getReviews(String movieId) {
         if (RetrofitHelper.API_KEY.isEmpty()) {
             Toast.makeText(getContext(), "Configure your API key from themoviedb.org!", Toast.LENGTH_SHORT).show();
         }
 
         TmdbInterface tmdbInterface = RetrofitHelper.getClient().create(TmdbInterface.class);
 
-        Call<TrailerResults> call = tmdbInterface.getTrailer(movieId, RetrofitHelper.API_KEY);
+        Call<ReviewResults> call = tmdbInterface.getReviews(movieId, RetrofitHelper.API_KEY);
+        call.enqueue(new Callback<ReviewResults>() {
+            @Override
+            public void onResponse(Call<ReviewResults> call, Response<ReviewResults> response) {
+                reviews = response.body().getResults();
+                recyclerView.setAdapter(new ReviewAdapter(reviews, context, R.layout.review_item));
+                Log.d(TAG, "Author name" + reviews.get(0).getReviewAuthor());
+            }
+
+            @Override
+            public void onFailure(Call<ReviewResults> call, Throwable t) {
+                Log.d(TAG, "Review downloads failed");
+            }
+        });
+    }
+
+    private void getTrailers(String movieId) {
+        if (RetrofitHelper.API_KEY.isEmpty()) {
+            Toast.makeText(getContext(), "Configure your API key from themoviedb.org!", Toast.LENGTH_SHORT).show();
+        }
+
+        TmdbInterface tmdbInterface = RetrofitHelper.getClient().create(TmdbInterface.class);
+
+        Call<TrailerResults> call = tmdbInterface.getTrailers(movieId, RetrofitHelper.API_KEY);
         call.enqueue(new Callback<TrailerResults>() {
             @Override
             public void onResponse(Call<TrailerResults> call, Response<TrailerResults> response) {
@@ -118,6 +147,17 @@ public class DetailActivityFragment extends Fragment {
         // Trailers section
         TextView trailerOne = (TextView) rootView.findViewById(R.id.detail_movie_trailer_1);
         TextView trailerTwo = (TextView) rootView.findViewById(R.id.detail_movie_trailer_2);
+
+        // Reviews section
+        recyclerView = (RecyclerView) rootView.findViewById(R.id.rv_movie_reviews);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
+
+        if (reviews != null) {
+            Log.d(TAG, "Author of " + movie.getMovieTitle() + " review is " + reviews.get(0).getReviewAuthor());
+        } else {
+            Log.d(TAG, "Reviews is null");
+        }
 
         trailerOne.setOnClickListener(new View.OnClickListener() {
             @Override
