@@ -2,6 +2,7 @@ package com.example.bagus.moviedbv2;
 
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -49,6 +50,18 @@ public class TopRatedFragment extends Fragment {
             @Override
             public void onResponse(Call<MovieResults> call, Response<MovieResults> response) {
                 movies = response.body().getResults();
+                MovieAdapter adapter = new MovieAdapter(movies, R.layout.movie_item, getContext());
+
+                adapter.setClickListener(new MovieAdapter.ClickListener() {
+                    @Override
+                    public void itemClicked(View view, int position) {
+                        Intent intent = new Intent(getActivity(), DetailActivity.class);
+                        intent.putExtra(MovieAdapter.MovieViewHolder.MOVIE, movies.get(position));
+                        startActivity(intent);
+                    }
+                });
+
+                moviesRecyclerView.setAdapter(adapter);
             }
 
             @Override
@@ -75,8 +88,6 @@ public class TopRatedFragment extends Fragment {
             movies = savedInstanceState.getParcelableArrayList("movies");
         }
 
-        moviesRecyclerView.setAdapter(new MovieAdapter(movies, R.layout.movie_item, getContext()));
-
         // Inflate the layout for this fragment
         return rootView;
     }
@@ -92,7 +103,6 @@ public class TopRatedFragment extends Fragment {
             spanSize = 2;
         }
         moviesRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), spanSize));
-        moviesRecyclerView.setAdapter(new MovieAdapter(movies, R.layout.movie_item, getContext()));
     }
 
     private boolean isNetworkAvailable() {

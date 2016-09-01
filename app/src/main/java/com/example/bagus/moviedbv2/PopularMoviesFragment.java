@@ -50,6 +50,17 @@ public class PopularMoviesFragment extends Fragment{
             @Override
             public void onResponse(Call<MovieResults> call, Response<MovieResults> response) {
                 movies = response.body().getResults();
+                MovieAdapter adapter = new MovieAdapter(movies, R.layout.movie_item, getContext());
+
+                moviesRecyclerView.setAdapter(adapter);
+                adapter.setClickListener(new MovieAdapter.ClickListener() {
+                    @Override
+                    public void itemClicked(View view, int position) {
+                        Intent intent = new Intent(getActivity(), DetailActivity.class);
+                        intent.putExtra(MovieAdapter.MovieViewHolder.MOVIE, movies.get(position));
+                        startActivity(intent);
+                    }
+                });
             }
 
             @Override
@@ -77,17 +88,7 @@ public class PopularMoviesFragment extends Fragment{
             Log.d(TAG, "There's a movies already, no need to get the new one!");
 
         }
-        MovieAdapter adapter = new MovieAdapter(movies, R.layout.movie_item, getContext());
 
-        moviesRecyclerView.setAdapter(adapter);
-        adapter.setClickListener(new MovieAdapter.ClickListener() {
-            @Override
-            public void itemClicked(View view, int position) {
-                Intent intent = new Intent(getActivity(), DetailActivity.class);
-                intent.putExtra(MovieAdapter.MovieViewHolder.MOVIE, movies.get(position));
-                startActivity(intent);
-            }
-        });
 
         // Inflate the layout for this fragment
         return rootView;
@@ -104,7 +105,6 @@ public class PopularMoviesFragment extends Fragment{
             spanSize = 2;
         }
         moviesRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), spanSize));
-        moviesRecyclerView.setAdapter(new MovieAdapter(movies, R.layout.movie_item, getContext()));
     }
 
     private boolean isNetworkAvailable() {
