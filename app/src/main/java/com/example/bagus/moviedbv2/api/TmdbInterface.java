@@ -5,9 +5,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
-/**
- * Created by bagus on 24/08/16.
- */
+
 public interface TmdbInterface {
     @GET("movie/popular")
     Call<MovieResults> getPopularMovies(@Query("api_key") String api);

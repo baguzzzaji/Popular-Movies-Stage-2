@@ -33,6 +33,7 @@ public class PopularMoviesFragment extends Fragment{
 
     private RecyclerView moviesRecyclerView;
     List<Movie> movies;
+    MovieAdapter adapter;
 
     public PopularMoviesFragment() {
         // Required empty public constructor
@@ -50,7 +51,7 @@ public class PopularMoviesFragment extends Fragment{
             @Override
             public void onResponse(Call<MovieResults> call, Response<MovieResults> response) {
                 movies = response.body().getResults();
-                MovieAdapter adapter = new MovieAdapter(movies, R.layout.movie_item, getContext());
+                adapter = new MovieAdapter(movies, R.layout.movie_item, getContext());
 
                 moviesRecyclerView.setAdapter(adapter);
                 adapter.setClickListener(new MovieAdapter.ClickListener() {
@@ -85,8 +86,17 @@ public class PopularMoviesFragment extends Fragment{
             }
         } else {
             movies = savedInstanceState.getParcelableArrayList("movies");
+            adapter = new MovieAdapter(movies, R.layout.movie_item, getContext());
+            moviesRecyclerView.setAdapter(adapter);
+            adapter.setClickListener(new MovieAdapter.ClickListener() {
+                @Override
+                public void itemClicked(View view, int position) {
+                    Intent intent = new Intent(getActivity(), DetailActivity.class);
+                    intent.putExtra(MovieAdapter.MovieViewHolder.MOVIE, movies.get(position));
+                    startActivity(intent);
+                }
+            });
             Log.d(TAG, "There's a movies already, no need to get the new one!");
-
         }
 
 
@@ -104,6 +114,7 @@ public class PopularMoviesFragment extends Fragment{
         } else if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
             spanSize = 2;
         }
+        moviesRecyclerView.setAdapter(new MovieAdapter(movies, R.layout.movie_item, getContext()));
         moviesRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), spanSize));
     }
 

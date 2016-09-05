@@ -6,6 +6,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -29,6 +32,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
+import io.realm.RealmList;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -47,6 +53,9 @@ public class DetailActivityFragment extends Fragment {
 
     private RecyclerView recyclerView;
 
+    private Realm realm;
+    private RealmConfiguration realmConfiguration;
+
     public DetailActivityFragment() {
     }
 
@@ -55,6 +64,14 @@ public class DetailActivityFragment extends Fragment {
         super.onCreate(savedInstanceState);
         movie = getActivity().getIntent().getParcelableExtra(MovieAdapter.MovieViewHolder.MOVIE);
         context = getContext();
+
+
+        realmConfiguration = new RealmConfiguration
+                .Builder(context)
+                .build();
+        Realm.setDefaultConfiguration(realmConfiguration);
+        realm = Realm.getDefaultInstance();
+
         getTrailers(movie.getMovieId());
         getReviews(movie.getMovieId());
     }
@@ -72,7 +89,13 @@ public class DetailActivityFragment extends Fragment {
             public void onResponse(Call<ReviewResults> call, Response<ReviewResults> response) {
                 reviews = response.body().getResults();
                 recyclerView.setAdapter(new ReviewAdapter(reviews, context, R.layout.review_item));
-                Log.d(TAG, "Author name" + reviews.get(0).getReviewAuthor());
+                
+                RealmList<Review> realmList = new RealmList<Review>();
+                for (Review review :
+                        reviews) {
+                    realmList.add(review);
+                }
+                movie.setReviews(realmList);
             }
 
             @Override
@@ -94,6 +117,12 @@ public class DetailActivityFragment extends Fragment {
             @Override
             public void onResponse(Call<TrailerResults> call, Response<TrailerResults> response) {
                 trailers = response.body().getResults();
+                RealmList<Trailer> realmList = new RealmList<Trailer>();
+                for (Trailer trailer :
+                        trailers) {
+                    realmList.add(trailer);
+                }
+                movie.setTrailers(realmList);
             }
 
             @Override
@@ -106,7 +135,7 @@ public class DetailActivityFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
+        final View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
 
         // Movie section
         ImageView backdropImageView = (ImageView) rootView.findViewById(R.id.movie_backdrop);
@@ -181,6 +210,22 @@ public class DetailActivityFragment extends Fragment {
             }
         });
 
+        FloatingActionButton fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
+        final CoordinatorLayout coordinatorLayout = (CoordinatorLayout) rootView.findViewById(R.id.coordinator_layout);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                realm.executeTransaction(new Realm.Transaction() {
+                    @Override
+                    public void execute(Realm realm) {
+                        realm.copyToRealm(movie);
+                    }
+                });
+
+                Snackbar.make(coordinatorLayout, "Movie saved!", Snackbar.LENGTH_LONG).show();
+            }
+        });
+
 
         Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
         ((DetailActivity) getActivity()).setSupportActionBar(toolbar);
@@ -197,4 +242,5 @@ public class DetailActivityFragment extends Fragment {
 
         return rootView;
     }
+
 }

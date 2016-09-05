@@ -6,7 +6,13 @@ import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
-public class Movie implements Parcelable {
+import io.realm.RealmList;
+import io.realm.RealmModel;
+import io.realm.annotations.PrimaryKey;
+import io.realm.annotations.RealmClass;
+
+@RealmClass
+public class Movie implements RealmModel, Parcelable {
     @SerializedName("title")
     String movieTitle;
     @SerializedName("overview")
@@ -19,8 +25,27 @@ public class Movie implements Parcelable {
     String movieBackdropImage;
     @SerializedName("vote_average")
     Double movieRating;
+    @PrimaryKey
     @SerializedName("id")
     String movieId;
+    RealmList<Review> reviews;
+    RealmList<Trailer> trailers;
+
+    public RealmList<Review> getReviews() {
+        return reviews;
+    }
+
+    public void setReviews(RealmList<Review> reviews) {
+        this.reviews = reviews;
+    }
+
+    public RealmList<Trailer> getTrailers() {
+        return trailers;
+    }
+
+    public void setTrailers(RealmList<Trailer> trailers) {
+        this.trailers = trailers;
+    }
 
     public String getMovieId() {
         return movieId;
@@ -52,6 +77,10 @@ public class Movie implements Parcelable {
 
     public String getMovieBackdropImage() {
         return movieBackdropImage;
+    }
+
+    public Movie() {
+
     }
 
     protected Movie(Parcel in) {
