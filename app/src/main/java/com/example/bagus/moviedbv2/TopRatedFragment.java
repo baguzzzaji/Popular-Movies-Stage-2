@@ -80,11 +80,13 @@ public class TopRatedFragment extends Fragment {
         initializeRecyclerView(rootView);
 
         if (savedInstanceState == null || !savedInstanceState.containsKey("movies")) {
+
             if (isNetworkAvailable()) {
                 getTopRatedMovies();
             } else {
                 Toast.makeText(getActivity(), "Could not download movies, network error.", Toast.LENGTH_SHORT).show();
             }
+
         } else {
             movies = savedInstanceState.getParcelableArrayList("movies");
             adapter = new MovieAdapter(movies, R.layout.movie_item, getContext());

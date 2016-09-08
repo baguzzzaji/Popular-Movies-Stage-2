@@ -80,10 +80,10 @@ public class PopularMoviesFragment extends Fragment{
 
             if (isNetworkAvailable()) {
                 getPopularMovies();
-                Log.d(TAG, "Downloading movies!");
             } else {
                 Toast.makeText(getActivity(), "Could not download movies, network error.", Toast.LENGTH_SHORT).show();
             }
+
         } else {
             movies = savedInstanceState.getParcelableArrayList("movies");
             adapter = new MovieAdapter(movies, R.layout.movie_item, getContext());

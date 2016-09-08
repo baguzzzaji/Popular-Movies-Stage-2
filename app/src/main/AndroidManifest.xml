@@ -30,6 +30,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.bagus.moviedbv2.MainActivity" />
         </activity>
+        <activity
+            android:name=".DetailActivityFavorite"
+            android:label="@string/title_activity_detail_activity_favorite"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.bagus.moviedbv2.MainActivity" />
+        </activity>
     </application>
 
 </manifest>

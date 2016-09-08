@@ -13,4 +13,5 @@
     <string name="review_author_placeholder">Author name</string>
     <string name="review_text_placeholder">The review text</string>
     <string name="review_headline_text">Reviews</string>
+    <string name="title_activity_detail_activity_favorite">DetailActivityFavorite</string>
 </resources>

@@ -2,9 +2,11 @@ package com.example.bagus.moviedbv2;
 
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -79,6 +81,16 @@ public class FavoritesFragment extends Fragment {
             Picasso.with(getContext())
                     .load("http://image.tmdb.org/t/p/w185"+movie.getMoviePoster())
                     .into(viewHolder.posterView);
+
+            viewHolder.posterView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(getActivity(), DetailActivityFavorite.class);
+                    intent.putExtra("id", movie.getMovieId());
+                    startActivity(intent);
+                    Log.d(TAG, "onClick: movieId is " + movie.getMovieId());
+                }
+            });
         }
 
     }

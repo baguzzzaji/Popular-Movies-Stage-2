@@ -29,6 +29,7 @@ import com.squareup.picasso.Picasso;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -65,15 +66,13 @@ public class DetailActivityFragment extends Fragment {
         movie = getActivity().getIntent().getParcelableExtra(MovieAdapter.MovieViewHolder.MOVIE);
         context = getContext();
 
-
         realmConfiguration = new RealmConfiguration
                 .Builder(context)
                 .build();
+
         Realm.setDefaultConfiguration(realmConfiguration);
         realm = Realm.getDefaultInstance();
 
-        getTrailers(movie.getMovieId());
-        getReviews(movie.getMovieId());
     }
 
     private void getReviews(String movieId) {
@@ -135,7 +134,7 @@ public class DetailActivityFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container,
                              Bundle savedInstanceState) {
-        final View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
 
         // Movie section
         ImageView backdropImageView = (ImageView) rootView.findViewById(R.id.movie_backdrop);
@@ -173,14 +172,24 @@ public class DetailActivityFragment extends Fragment {
             e.printStackTrace();
         }
 
-        // Trailers section
-        TextView trailerOne = (TextView) rootView.findViewById(R.id.detail_movie_trailer_1);
-        TextView trailerTwo = (TextView) rootView.findViewById(R.id.detail_movie_trailer_2);
-
         // Reviews section
         recyclerView = (RecyclerView) rootView.findViewById(R.id.rv_movie_reviews);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
+
+        if (savedInstanceState != null) {
+            reviews = savedInstanceState.getParcelableArrayList("reviews");
+            trailers = savedInstanceState.getParcelableArrayList("trailers");
+            recyclerView.setAdapter(new ReviewAdapter(reviews, context, R.layout.review_item));
+        } else {
+            getTrailers(movie.getMovieId());
+            getReviews(movie.getMovieId());
+        }
+
+        // Trailers section
+        TextView trailerOne = (TextView) rootView.findViewById(R.id.detail_movie_trailer_1);
+        TextView trailerTwo = (TextView) rootView.findViewById(R.id.detail_movie_trailer_2);
+
 
         if (reviews != null) {
             Log.d(TAG, "Author of " + movie.getMovieTitle() + " review is " + reviews.get(0).getReviewAuthor());
@@ -218,7 +227,7 @@ public class DetailActivityFragment extends Fragment {
                 realm.executeTransaction(new Realm.Transaction() {
                     @Override
                     public void execute(Realm realm) {
-                        realm.copyToRealm(movie);
+                        realm.copyToRealmOrUpdate(movie);
                     }
                 });
 
@@ -243,4 +252,13 @@ public class DetailActivityFragment extends Fragment {
         return rootView;
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        ArrayList<Review> reviews = (ArrayList<Review>) this.reviews;
+        ArrayList<Trailer> trailers = (ArrayList<Trailer>) this.trailers;
+
+        outState.putParcelableArrayList("reviews", reviews);
+        outState.putParcelableArrayList("trailers", trailers);
+    }
 }
