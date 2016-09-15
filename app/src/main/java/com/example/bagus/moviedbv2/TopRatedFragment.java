@@ -7,6 +7,7 @@ import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -32,6 +33,7 @@ public class TopRatedFragment extends Fragment {
     private static final String TAG = PopularMoviesFragment.class.getSimpleName();
 
     private RecyclerView moviesRecyclerView;
+    private boolean twoPane;
     List<Movie> movies;
     MovieAdapter adapter;
 
@@ -56,9 +58,15 @@ public class TopRatedFragment extends Fragment {
                 adapter.setClickListener(new MovieAdapter.ClickListener() {
                     @Override
                     public void itemClicked(View view, int position) {
-                        Intent intent = new Intent(getActivity(), DetailActivity.class);
-                        intent.putExtra(MovieAdapter.MovieViewHolder.MOVIE, movies.get(position));
-                        startActivity(intent);
+                        if (twoPane) {
+                            Bundle arguments = new Bundle();
+                            arguments.putParcelable(MovieAdapter.MovieViewHolder.MOVIE, movies.get(position));
+                            addDetailFragmentTwoPane(arguments);
+                        } else {
+                            Intent intent = new Intent(getActivity(), DetailActivity.class);
+                            intent.putExtra(MovieAdapter.MovieViewHolder.MOVIE, movies.get(position));
+                            startActivity(intent);
+                        }
                     }
                 });
 
@@ -73,6 +81,12 @@ public class TopRatedFragment extends Fragment {
     }
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        twoPane = MainActivity.isTwoPane();
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
@@ -80,7 +94,6 @@ public class TopRatedFragment extends Fragment {
         initializeRecyclerView(rootView);
 
         if (savedInstanceState == null || !savedInstanceState.containsKey("movies")) {
-
             if (isNetworkAvailable()) {
                 getTopRatedMovies();
             } else {
@@ -94,15 +107,30 @@ public class TopRatedFragment extends Fragment {
             adapter.setClickListener(new MovieAdapter.ClickListener() {
                 @Override
                 public void itemClicked(View view, int position) {
-                    Intent intent = new Intent(getActivity(), DetailActivity.class);
-                    intent.putExtra(MovieAdapter.MovieViewHolder.MOVIE, movies.get(position));
-                    startActivity(intent);
+                    if (twoPane) {
+                        Bundle arguments = new Bundle();
+                        arguments.putParcelable(MovieAdapter.MovieViewHolder.MOVIE, movies.get(position));
+                        addDetailFragmentTwoPane(arguments);
+                    } else {
+                        Intent intent = new Intent(getActivity(), DetailActivity.class);
+                        intent.putExtra(MovieAdapter.MovieViewHolder.MOVIE, movies.get(position));
+                        startActivity(intent);
+                    }
                 }
             });
         }
 
         // Inflate the layout for this fragment
         return rootView;
+    }
+
+    private void addDetailFragmentTwoPane(Bundle bundle) {
+
+        DetailActivityFragment fragment = new DetailActivityFragment();
+        fragment.setArguments(bundle);
+        getActivity().getSupportFragmentManager().beginTransaction()
+                .replace(R.id.movie_detail_container, fragment)
+                .commit();
     }
 
     private void initializeRecyclerView(View view) {

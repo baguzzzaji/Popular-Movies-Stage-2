@@ -5,10 +5,20 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static String TAG = MainActivity.class.getSimpleName();
+
+    private static boolean twoPane;
+    private static final String DETAILFRAGMENT_TAG = "DFTAG";
+
+    public static boolean isTwoPane() {
+        return twoPane;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,6 +34,14 @@ public class MainActivity extends AppCompatActivity {
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tablayout);
         tabLayout.setupWithViewPager(viewPager);
+
+        if (findViewById(R.id.movie_detail_container) != null) {
+            twoPane = true;
+        } else {
+            twoPane = false;
+        }
+
+        Log.d(TAG, "onCreate: twoPane" + twoPane);
 
     }
 
@@ -48,4 +66,5 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
 }

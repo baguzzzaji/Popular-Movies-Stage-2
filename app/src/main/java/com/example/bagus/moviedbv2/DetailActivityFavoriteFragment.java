@@ -3,6 +3,7 @@ package com.example.bagus.moviedbv2;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -37,17 +38,36 @@ public class DetailActivityFavoriteFragment extends Fragment {
 
     private String TAG = DetailActivityFavoriteFragment.class.getSimpleName();
 
+    private boolean twoPane;
+    private Movie movie;
+    private Realm realm;
+    private RealmResults<Movie> movies;
+
     public DetailActivityFavoriteFragment() {
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        twoPane = MainActivity.isTwoPane();
+        RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(getContext()).build();
+        Realm.setDefaultConfiguration(realmConfiguration);
+        realm = Realm.getDefaultInstance();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView =  inflater.inflate(R.layout.fragment_detail_activity_favorite, container, false);
-        String movieId = getActivity().getIntent().getStringExtra("id");
 
-        RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(getContext()).build();
-        Realm.setDefaultConfiguration(realmConfiguration);
+        String movieId;
+
+        if (twoPane) {
+            movieId = getArguments().getString(MovieAdapter.MovieViewHolder.MOVIE);
+        } else {
+            movieId = getActivity().getIntent().getStringExtra("id");
+        }
+
         final Realm realm = Realm.getDefaultInstance();
         final RealmResults<Movie> movies = realm.where(Movie.class).equalTo("movieId", movieId).findAll();
         final Movie movie = movies.get(0);
@@ -100,13 +120,6 @@ public class DetailActivityFavoriteFragment extends Fragment {
         TextView trailerOne = (TextView) rootView.findViewById(R.id.detail_movie_trailer_1);
         TextView trailerTwo = (TextView) rootView.findViewById(R.id.detail_movie_trailer_2);
 
-
-        if (reviews != null) {
-            Log.d(TAG, "Author of " + movie.getMovieTitle() + " review is " + reviews.get(0).getReviewAuthor());
-        } else {
-            Log.d(TAG, "Reviews is null");
-        }
-
         trailerOne.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -145,19 +158,19 @@ public class DetailActivityFavoriteFragment extends Fragment {
             }
         });
 
+        if (!twoPane) {
+            Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
+            ((DetailActivityFavorite) getActivity()).setSupportActionBar(toolbar);
 
-        Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
-        ((DetailActivityFavorite) getActivity()).setSupportActionBar(toolbar);
-
-        try {
-            ((DetailActivityFavorite) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        } catch (NullPointerException e) {
-            e.printStackTrace();
+            try {
+                ((DetailActivityFavorite) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+            }
         }
-
-        CollapsingToolbarLayout collapsingToolbarLayout = (CollapsingToolbarLayout) rootView.findViewById(R.id.collapsing_toolbar);
-        collapsingToolbarLayout.setTitle(movie.getMovieTitle());
-        collapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
+            CollapsingToolbarLayout collapsingToolbarLayout = (CollapsingToolbarLayout) rootView.findViewById(R.id.collapsing_toolbar);
+            collapsingToolbarLayout.setTitle(movie.getMovieTitle());
+            collapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
 
         return rootView;
     }

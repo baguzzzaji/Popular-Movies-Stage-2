@@ -27,6 +27,7 @@ public class FavoritesFragment extends Fragment {
     private String TAG = FavoritesFragment.class.getSimpleName();
 
     private Realm realm;
+    private boolean twoPane;
 
     public FavoritesFragment() {
         // Required empty public constructor
@@ -38,7 +39,7 @@ public class FavoritesFragment extends Fragment {
         RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(getContext()).build();
         Realm.setDefaultConfiguration(realmConfiguration);
         realm = Realm.getDefaultInstance();
-
+        twoPane = MainActivity.isTwoPane();
     }
 
     @Override
@@ -85,12 +86,26 @@ public class FavoritesFragment extends Fragment {
             viewHolder.posterView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(getActivity(), DetailActivityFavorite.class);
-                    intent.putExtra("id", movie.getMovieId());
-                    startActivity(intent);
-                    Log.d(TAG, "onClick: movieId is " + movie.getMovieId());
+                    if (twoPane) {
+                        Bundle arguments = new Bundle();
+                        arguments.putString(MovieAdapter.MovieViewHolder.MOVIE, movie.getMovieId());
+                        addDetailFragmentTwoPane(arguments);
+                    } else {
+                        Intent intent = new Intent(getActivity(), DetailActivityFavorite.class);
+                        intent.putExtra("id", movie.getMovieId());
+                        startActivity(intent);
+                    }
+
                 }
             });
+        }
+
+        private void addDetailFragmentTwoPane(Bundle bundle) {
+            DetailActivityFavoriteFragment fragment = new DetailActivityFavoriteFragment();
+            fragment.setArguments(bundle);
+            getActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.movie_detail_container, fragment)
+                    .commit();
         }
 
     }

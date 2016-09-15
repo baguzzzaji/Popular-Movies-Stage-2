@@ -40,13 +40,12 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-/**
- * A placeholder fragment containing a simple view.
- */
+
 public class DetailActivityFragment extends Fragment {
 
     private String TAG = DetailActivityFragment.class.getSimpleName();
 
+    private boolean twoPane;
     private Movie movie;
     private List<Trailer> trailers;
     private List<Review> reviews;
@@ -60,10 +59,35 @@ public class DetailActivityFragment extends Fragment {
     public DetailActivityFragment() {
     }
 
+
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        movie = getActivity().getIntent().getParcelableExtra(MovieAdapter.MovieViewHolder.MOVIE);
+
+        twoPane = MainActivity.isTwoPane();
+
+        if (savedInstanceState == null) {
+            Log.d(TAG, "savedInstanceState is null");
+            if (twoPane){
+                try {
+                    movie = getArguments().getParcelable(MovieAdapter.MovieViewHolder.MOVIE);
+                    Log.d(TAG, "Get movie from arguments");
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                movie = getActivity().getIntent().getParcelableExtra(MovieAdapter.MovieViewHolder.MOVIE);
+                Log.d(TAG, "Get movie from intent");
+            }
+        } else {
+            Log.d(TAG, "savedInstanceState is not null");
+            movie = savedInstanceState.getParcelable(MovieAdapter.MovieViewHolder.MOVIE);
+            reviews = savedInstanceState.getParcelableArrayList("reviews");
+            trailers = savedInstanceState.getParcelableArrayList("trailers");
+            Log.d(TAG, "Get movie from savedInstanceState");
+        }
+
         context = getContext();
 
         realmConfiguration = new RealmConfiguration
@@ -177,25 +201,16 @@ public class DetailActivityFragment extends Fragment {
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
 
-        if (savedInstanceState != null) {
-            reviews = savedInstanceState.getParcelableArrayList("reviews");
-            trailers = savedInstanceState.getParcelableArrayList("trailers");
-            recyclerView.setAdapter(new ReviewAdapter(reviews, context, R.layout.review_item));
-        } else {
+        if (savedInstanceState == null) {
             getTrailers(movie.getMovieId());
             getReviews(movie.getMovieId());
         }
 
+        recyclerView.setAdapter(new ReviewAdapter(reviews, context, R.layout.review_item));
+
         // Trailers section
         TextView trailerOne = (TextView) rootView.findViewById(R.id.detail_movie_trailer_1);
         TextView trailerTwo = (TextView) rootView.findViewById(R.id.detail_movie_trailer_2);
-
-
-        if (reviews != null) {
-            Log.d(TAG, "Author of " + movie.getMovieTitle() + " review is " + reviews.get(0).getReviewAuthor());
-        } else {
-            Log.d(TAG, "Reviews is null");
-        }
 
         trailerOne.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -235,19 +250,32 @@ public class DetailActivityFragment extends Fragment {
             }
         });
 
+        FloatingActionButton fabShare = (FloatingActionButton) rootView.findViewById(R.id.fab_share);
+        fabShare.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+                sharingIntent.setType("text/plain");
+                sharingIntent.putExtra(Intent.EXTRA_SUBJECT, movie.getMovieTitle());
+                sharingIntent.putExtra(Intent.EXTRA_TEXT, movie.getMovieOverview());
+                startActivity(Intent.createChooser(sharingIntent, "Share via"));
+            }
+        });
 
-        Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
-        ((DetailActivity) getActivity()).setSupportActionBar(toolbar);
+        if (!twoPane) {
+            Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
+            ((DetailActivity) getActivity()).setSupportActionBar(toolbar);
 
-        try {
-            ((DetailActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        } catch (NullPointerException e) {
-            e.printStackTrace();
+            try {
+                ((DetailActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+            }
+
+            CollapsingToolbarLayout collapsingToolbarLayout = (CollapsingToolbarLayout) rootView.findViewById(R.id.collapsing_toolbar);
+            collapsingToolbarLayout.setTitle(movie.getMovieTitle());
+            collapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
         }
-
-        CollapsingToolbarLayout collapsingToolbarLayout = (CollapsingToolbarLayout) rootView.findViewById(R.id.collapsing_toolbar);
-        collapsingToolbarLayout.setTitle(movie.getMovieTitle());
-        collapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
 
         return rootView;
     }
@@ -258,6 +286,7 @@ public class DetailActivityFragment extends Fragment {
         ArrayList<Review> reviews = (ArrayList<Review>) this.reviews;
         ArrayList<Trailer> trailers = (ArrayList<Trailer>) this.trailers;
 
+        outState.putParcelable(MovieAdapter.MovieViewHolder.MOVIE, movie);
         outState.putParcelableArrayList("reviews", reviews);
         outState.putParcelableArrayList("trailers", trailers);
     }

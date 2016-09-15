@@ -7,6 +7,7 @@ import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -31,12 +32,21 @@ import retrofit2.Response;
 public class PopularMoviesFragment extends Fragment{
     private static final String TAG = PopularMoviesFragment.class.getSimpleName();
 
+    private boolean twoPane;
     private RecyclerView moviesRecyclerView;
     List<Movie> movies;
     MovieAdapter adapter;
 
     public PopularMoviesFragment() {
         // Required empty public constructor
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        twoPane = MainActivity.isTwoPane();
+
     }
 
     private void getPopularMovies() {
@@ -57,9 +67,15 @@ public class PopularMoviesFragment extends Fragment{
                 adapter.setClickListener(new MovieAdapter.ClickListener() {
                     @Override
                     public void itemClicked(View view, int position) {
-                        Intent intent = new Intent(getActivity(), DetailActivity.class);
-                        intent.putExtra(MovieAdapter.MovieViewHolder.MOVIE, movies.get(position));
-                        startActivity(intent);
+                        if (twoPane) {
+                            Bundle arguments = new Bundle();
+                            arguments.putParcelable(MovieAdapter.MovieViewHolder.MOVIE, movies.get(position));
+                            addDetailFragmentTwoPane(arguments);
+                        } else {
+                            Intent intent = new Intent(getActivity(), DetailActivity.class);
+                            intent.putExtra(MovieAdapter.MovieViewHolder.MOVIE, movies.get(position));
+                            startActivity(intent);
+                        }
                     }
                 });
             }
@@ -74,9 +90,9 @@ public class PopularMoviesFragment extends Fragment{
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_popular_movies, container, false);
+        final View rootView = inflater.inflate(R.layout.fragment_popular_movies, container, false);
         initializeRecyclerView(rootView);
-        if (savedInstanceState == null || !savedInstanceState.containsKey("movies")) {
+        if (savedInstanceState == null) {
 
             if (isNetworkAvailable()) {
                 getPopularMovies();
@@ -91,9 +107,15 @@ public class PopularMoviesFragment extends Fragment{
             adapter.setClickListener(new MovieAdapter.ClickListener() {
                 @Override
                 public void itemClicked(View view, int position) {
-                    Intent intent = new Intent(getActivity(), DetailActivity.class);
-                    intent.putExtra(MovieAdapter.MovieViewHolder.MOVIE, movies.get(position));
-                    startActivity(intent);
+                    if (twoPane) {
+                        Bundle arguments = new Bundle();
+                        arguments.putParcelable(MovieAdapter.MovieViewHolder.MOVIE, movies.get(position));
+                        addDetailFragmentTwoPane(arguments);
+                    } else {
+                        Intent intent = new Intent(getActivity(), DetailActivity.class);
+                        intent.putExtra(MovieAdapter.MovieViewHolder.MOVIE, movies.get(position));
+                        startActivity(intent);
+                    }
                 }
             });
             Log.d(TAG, "There's a movies already, no need to get the new one!");
@@ -102,6 +124,15 @@ public class PopularMoviesFragment extends Fragment{
 
         // Inflate the layout for this fragment
         return rootView;
+    }
+
+    private void addDetailFragmentTwoPane(Bundle bundle) {
+
+        DetailActivityFragment fragment = new DetailActivityFragment();
+        fragment.setArguments(bundle);
+        getActivity().getSupportFragmentManager().beginTransaction()
+                .replace(R.id.movie_detail_container, fragment)
+                .commit();
     }
 
     private void initializeRecyclerView(View view) {
